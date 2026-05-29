@@ -22,6 +22,17 @@
   --r:#f87171;--rd:rgba(248,113,113,.1);--rb:rgba(248,113,113,.25);
   --a:#818cf8;
 }
+body.light{
+  --bg:#f5f5f0;--s:#ffffff;--s2:#ebebeb;--b:#d4d4ce;
+  --t:#1a1a18;--m:#777770;
+  --g:#16a34a;--gd:rgba(22,163,74,.1);--gb:rgba(22,163,74,.3);
+  --y:#b45309;--yd:rgba(180,83,9,.1);--yb:rgba(180,83,9,.3);
+  --r:#dc2626;--rd:rgba(220,38,38,.1);--rb:rgba(220,38,38,.3);
+  --a:#4f46e5;
+}
+/* theme toggle btn */
+.themetog{background:none;border:1px solid var(--b);border-radius:5px;padding:.28rem .5rem;cursor:pointer;color:var(--m);font-size:.78rem;line-height:1;transition:color .15s,border-color .15s}
+.themetog:hover{color:var(--t);border-color:var(--m)}
 body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--t);min-height:100vh;font-size:14px}
 
 header{display:flex;align-items:center;gap:.65rem;padding:.6rem 1rem;border-bottom:1px solid var(--b);background:var(--s);position:sticky;top:0;z-index:10}
@@ -35,17 +46,7 @@ header{display:flex;align-items:center;gap:.65rem;padding:.6rem 1rem;border-bott
 #clearBtn{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--m);cursor:pointer;font-size:.75rem;line-height:1;padding:.1rem .2rem;display:none}
 #clearBtn:hover{color:var(--t)}
 #clearBtn.vis{display:block}
-.ltog{font-size:.68rem;color:var(--m);cursor:pointer;padding:.28rem .55rem;border:1px solid var(--b);border-radius:5px;background:none;font-family:'Inter',sans-serif;white-space:nowrap}
-.ltog:hover{color:var(--t)}
 
-.lpanel{display:none;background:var(--s);border-bottom:1px solid var(--b);padding:.65rem 1rem;gap:1.2rem;flex-wrap:wrap;align-items:flex-start}
-.lpanel.open{display:flex}
-.lg{display:flex;flex-direction:column;gap:.3rem}
-.lgt{font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--m)}
-.lgr{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
-.lgi{display:flex;align-items:center;gap:.28rem;font-size:.68rem;color:var(--m)}
-.dot{width:7px;height:7px;border-radius:50%}
-.dg{background:var(--g)}.dy{background:var(--y)}.dr{background:var(--r)}
 
 .ctrl{display:flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-bottom:1px solid var(--b);flex-wrap:wrap;background:var(--s)}
 .lbl{font-size:.62rem;color:var(--m)}
@@ -134,7 +135,6 @@ main{max-width:1100px;margin:0 auto;padding:.85rem 1rem 4rem}
 /* MOBILE */
 @media(max-width:600px){
   header{padding:.5rem .75rem;gap:.5rem}
-  .logo{display:none}
   .sw{max-width:none}
   #search{font-size:16px}/* prevents iOS zoom on focus */
   .ctrl{padding:.4rem .75rem;gap:.3rem}
@@ -165,31 +165,9 @@ main{max-width:1100px;margin:0 auto;padding:.85rem 1rem 4rem}
     <input id="search" type="text" placeholder="Suchen…" autocomplete="off">
     <button id="clearBtn" onclick="clearSearch()" tabindex="-1">&#x2715;</button>
   </div>
-  <button class="ltog" onclick="document.querySelector('.lpanel').classList.toggle('open')">Legende</button>
+  <button class="themetog" id="themetog" onclick="toggleTheme()" title="Light/Dark Mode">&#9681;</button>
 </header>
 
-<div class="lpanel">
-  <div class="lg">
-    <div class="lgt">Ampel</div>
-    <div class="lgr">
-      <div class="lgi"><div class="dot dg"></div>Verträglich</div>
-      <div class="lgi"><div class="dot dy"></div>Moderat</div>
-      <div class="lgi"><div class="dot dr"></div>Meiden</div>
-    </div>
-  </div>
-  <div class="lg">
-    <div class="lgt">Trigger</div>
-    <div class="lgr">
-      <span class="chip cF">FODMAP</span>
-      <span class="chip cS">Säure</span>
-      <span class="chip cFt">Fett</span>
-      <span class="chip cSc">Schärfe</span>
-      <span class="chip cH">Histamin</span>
-      <span class="chip cB">Blähend</span>
-      <span class="chip cSt">Stärke</span>
-    </div>
-  </div>
-</div>
 
 <div class="ctrl">
   <span class="lbl">Modus</span>
@@ -388,6 +366,15 @@ const db=[
 ];
 
 let sq="",mode="fodmap",filt="all",cat="all",sortByScore=false;
+let darkMode=true;
+function toggleTheme(){
+  darkMode=!darkMode;
+  document.body.classList.toggle('light',!darkMode);
+  document.getElementById('themetog').textContent=darkMode?'⚁':'☀';
+  localStorage.setItem('theme',darkMode?'dark':'light');
+}
+// restore theme
+(function(){const t=localStorage.getItem('theme');if(t==='light'){darkMode=false;document.body.classList.add('light');document.getElementById('themetog').textContent='☀';}})();
 function getS(f){if(mode==="fodmap")return f.fodmap;if(mode==="magen")return f.magen;const r={green:0,yellow:1,red:2};return r[f.fodmap]>=r[f.magen]?f.fodmap:f.magen;}
 function scCls(s){return s>=7?"sc-g":s>=4?"sc-y":"sc-r";}
 function scoreBar(s){const cls=scCls(s);return'<div class="score-row"><div class="score-bar-wrap"><div class="score-bar '+cls+'" style="width:'+(s*10)+'%"></div></div><span class="score-num '+cls+'">'+s+'/10</span></div>';}
@@ -463,130 +450,11 @@ function findAlts(f){
 }
 
 function oM(i){
-  const f=db[i
-,
-// OBST NEU
-{name:"Heidelbeeren (gefroren)",cat:"Obst",fodmap:"yellow",magen:"yellow",triggers:["fodmap","saeure"],fodmaps:["Sorbit","Fruktose"],note:"Max. 40g.",magenNote:"Kalt – Zimmertemperatur auftauen lassen.",portion:"40g",score:5.2},
-{name:"Granatapfel",cat:"Obst",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Säurehaltig – in kleinen Mengen testen.",portion:"60g",score:6.5},
-{name:"Litschi",cat:"Obst",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Mild und süß – gut verträglich.",portion:"10 Stück",score:10.0},
-{name:"Passionsfrucht",cat:"Obst",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Säurehaltig.",portion:"2 Stück",score:6.5},
-{name:"Sternfrucht (Karambole)",cat:"Obst",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Säurehaltig.",portion:"1 mittel",score:6.5},
-{name:"Datteltomate",cat:"Obst",fodmap:"green",magen:"red",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Säurereich wie normale Tomate.",portion:"–",score:3.5},
-{name:"Physalis",cat:"Obst",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Leicht säurehaltig.",portion:"10 Stück",score:6.5},
-{name:"Rhabarber",cat:"Obst",fodmap:"green",magen:"red",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Sehr säurereich – meiden.",portion:"–",score:3.5},
-{name:"Brombeeren",cat:"Obst",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Säure + Kerne können reizen.",portion:"60g",score:6.5},
-{name:"Stachelbeeren",cat:"Obst",fodmap:"green",magen:"red",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Sehr sauer – meiden.",portion:"–",score:3.5},
-{name:"Preiselbeeren",cat:"Obst",fodmap:"red",magen:"red",triggers:["fodmap","saeure"],fodmaps:["Sorbit"],note:"Hoher Sorbitgehalt.",magenNote:"Sehr sauer und FODMAP-reich.",portion:"–",score:1.0},
-{name:"Kokoswasser",cat:"Obst",fodmap:"yellow",magen:"green",triggers:["fodmap"],fodmaps:["Sorbit"],note:"Max. 250ml.",magenNote:"Mild und isotonisch – gut für Magen.",portion:"250ml",score:6.5},
-// GEMÜSE NEU
-{name:"Rucola",cat:"Gemüse",fodmap:"green",magen:"yellow",triggers:["schaerfe","saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Bitter + scharf – kleine Menge.",portion:"30g",score:5.8},
-{name:"Pak Choi (gedampft)",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Sehr mild.",portion:"75g",score:10.0},
-{name:"Mangold",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Mild und leicht verdaulich.",portion:"75g",score:10.0},
-{name:"Endivie",cat:"Gemüse",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Leicht bitter – in Maßen.",portion:"50g",score:6.5},
-{name:"Chicorée",cat:"Gemüse",fodmap:"green",magen:"yellow",triggers:["blaehend"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Inulin kann blähend wirken.",portion:"50g",score:6.7},
-{name:"Rettich",cat:"Gemüse",fodmap:"green",magen:"yellow",triggers:["schaerfe","blaehend"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Scharf + blähend – kleine Menge.",portion:"40g",score:5.8},
-{name:"Topinambur",cat:"Gemüse",fodmap:"red",magen:"red",triggers:["fodmap","blaehend"],fodmaps:["Fruktane","GOS"],note:"Sehr hoher Fruktan-Gehalt.",magenNote:"Extrem blähend – meiden.",portion:"–",score:1.0},
-{name:"Pastinake",cat:"Gemüse",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Stärkereich – kleine Menge.",portion:"75g",score:6.7},
-{name:"Petersilienwurzel",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Mild und verdauungsfördernd.",portion:"75g",score:10.0},
-{name:"Meerrettich",cat:"Gemüse",fodmap:"green",magen:"red",triggers:["schaerfe"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Sehr scharf – meiden.",portion:"–",score:3.0},
-{name:"Wasabi",cat:"Gemüse",fodmap:"green",magen:"red",triggers:["schaerfe"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Extrem scharf – meiden.",portion:"–",score:3.0},
-{name:"Bambussprossen (Dose)",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Mild und gut verträglich.",portion:"75g",score:10.0},
-{name:"Wasserkastanie",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Leicht und mild.",portion:"75g",score:10.0},
-{name:"Mungobohnensprossen",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Sehr leicht verdaulich.",portion:"75g",score:10.0},
-{name:"Okra",cat:"Gemüse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Schleimbildend – schützt Magen.",portion:"75g",score:10.0},
-{name:"Schwarze Oliven",cat:"Gemüse",fodmap:"green",magen:"red",triggers:["fett","histamin"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Fett + Histamin (durch Reifung) – max. 3–4 Stück.",portion:"3–4 Stück",score:2.6},
-{name:"Kapern",cat:"Gemüse",fodmap:"green",magen:"red",triggers:["saeure","histamin"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Säure + Histamin – meiden.",portion:"–",score:2.1},
-{name:"Kimchi",cat:"Gemüse",fodmap:"red",magen:"red",triggers:["fodmap","schaerfe","histamin","saeure"],fodmaps:["Fruktane","GOS"],note:"Hoher FODMAP-Gehalt.",magenNote:"Scharf, fermentiert, histaminreich – meiden.",portion:"–",score:1.0},
-{name:"Sauerkraut",cat:"Gemüse",fodmap:"yellow",magen:"red",triggers:["fodmap","saeure","histamin","blaehend"],fodmaps:["Fruktane"],note:"Kleine Menge.",magenNote:"Sehr sauer + histaminreich – meiden.",portion:"–",score:1.0},
-// GETREIDE NEU
-{name:"Amaranth",cat:"Getreide",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Leicht verdaulich, nährstoffreich.",portion:"180g",score:10.0},
-{name:"Teff",cat:"Getreide",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Mild und gut verträglich.",portion:"180g",score:10.0},
-{name:"Sorghumhirse",cat:"Getreide",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Gut verträglich.",portion:"180g",score:10.0},
-{name:"Reisnudeln (dünn)",cat:"Getreide",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Gut verträglich.",magenNote:"Stärkereich – al dente lassen.",portion:"180g",score:6.7},
-{name:"Glasnudeln",cat:"Getreide",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Stärkereich (Möngbohne).",portion:"180g",score:6.7},
-{name:"Maiswaffeln",cat:"Getreide",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Gut verträglich.",magenNote:"Stärkereich – kleine Menge.",portion:"2 Stück",score:6.7},
-{name:"Reisflöckchen",cat:"Getreide",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Schonend – ideal als Porridge bei Schüben.",portion:"52g",score:10.0},
-{name:"Hirsebrei",cat:"Getreide",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Basisch + mild – sehr gut bei Reizmagen.",portion:"180g",score:10.0},
-{name:"Pfannkuchen (glutenfrei)",cat:"Getreide",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Auf Zutaten achten.",magenNote:"Gut – auf laktosefreie Milch achten.",portion:"2 dünne",score:6.2},
-// MILCH NEU
-{name:"Sojajoghurt",cat:"Milch",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Aus Sojaprotein – gut verträglich.",magenNote:"Probiotisch – gut für Darmflora.",portion:"170g",score:10.0},
-{name:"Kokosjoghurt",cat:"Milch",fodmap:"yellow",magen:"red",triggers:["fodmap","fett"],fodmaps:["Sorbit"],note:"Max. 125g.",magenNote:"Sehr fettreich.",portion:"60g",score:2.0},
-{name:"Mandeldrink (gesüßt)",cat:"Milch",fodmap:"yellow",magen:"green",triggers:["fodmap"],fodmaps:["GOS"],note:"Auf Zucker + GOS achten.",magenNote:"Süß – ungesüßte Variante bevorzugen.",portion:"200ml",score:6.5},
-{name:"Erbsenproteindrink",cat:"Milch",fodmap:"yellow",magen:"yellow",triggers:["fodmap","blaehend"],fodmaps:["GOS"],note:"Max. 250ml.",magenNote:"Kann blähend wirken.",portion:"250ml",score:3.7},
-{name:"Laktosefreie Buttermilch",cat:"Milch",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"Gut verträglich.",magenNote:"Säurehaltig – kleine Menge.",portion:"150ml",score:6.5},
-{name:"Schafskäse (Feta)",cat:"Milch",fodmap:"green",magen:"yellow",triggers:["fett","saeure","histamin"],fodmaps:[],note:"Gut verträglich.",magenNote:"Salzig, säurehaltig, fettreich – kleine Menge.",portion:"20g",score:3.6},
-{name:"Ziegenkäse (frisch)",cat:"Milch",fodmap:"green",magen:"yellow",triggers:["fett","saeure"],fodmaps:[],note:"Gut verträglich.",magenNote:"Leichter als Kuhmilchkäse.",portion:"30g",score:5.0},
-{name:"Quark (mager, laktosefrei)",cat:"Milch",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Probiotisch, mager – sehr gut.",portion:"150g",score:10.0},
-{name:"Skyr (laktosefrei)",cat:"Milch",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Eiweißreich, probiotisch – gut.",portion:"150g",score:10.0},
-// FLEISCH NEU
-{name:"Pute / Truthahn",cat:"Fleisch",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Mageres Protein – sehr gut.",portion:"unbegrenzt",score:10.0},
-{name:"Lamm (mager)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["fett"],fodmaps:[],note:"Gut verträglich.",magenNote:"Fettgehalt je nach Stück variabel.",portion:"120g",score:6.5},
-{name:"Ente (ohne Haut)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["fett"],fodmaps:[],note:"Gut verträglich.",magenNote:"Fetthaltiger als Hähnchen.",portion:"120g",score:6.5},
-{name:"Krebsfleisch (frisch)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["histamin"],fodmaps:[],note:"Gut verträglich.",magenNote:"Frisch ok – Meeresfrüchte können histaminreich sein.",portion:"100g",score:6.1},
-{name:"Muscheln (frisch)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["histamin"],fodmaps:[],note:"Gut verträglich.",magenNote:"Immer frisch – Histamin steigt bei Lagerung.",portion:"100g",score:6.1},
-{name:"Sardinen (frisch)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["histamin"],fodmaps:[],note:"Gut verträglich.",magenNote:"Frisch besser als Dose.",portion:"100g",score:6.1},
-{name:"Sardinen (Dose)",cat:"Fleisch",fodmap:"green",magen:"red",triggers:["histamin","fett"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Histaminreich durch Konservierung.",portion:"–",score:2.1},
-{name:"Hering (frisch)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["histamin","fett"],fodmaps:[],note:"Gut verträglich.",magenNote:"Fett– und histaminhaltig.",portion:"100g",score:5.1},
-{name:"Matjes",cat:"Fleisch",fodmap:"green",magen:"red",triggers:["histamin","fett","saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Histaminreich + Säure – meiden.",portion:"–",score:1.6},
-{name:"Krabben (frisch)",cat:"Fleisch",fodmap:"green",magen:"yellow",triggers:["histamin"],fodmaps:[],note:"Gut verträglich.",magenNote:"Frisch ok.",portion:"100g",score:6.1},
-// NÜSSE NEU
-{name:"Paranuss",cat:"Nüsse",fodmap:"green",magen:"red",triggers:["fett"],fodmaps:[],note:"Gut verträglich.",magenNote:"Extrem fettreich – max. 1–2 Stück.",portion:"1–2 Stück",score:3.5},
-{name:"Kokosröste (ungesüßt)",cat:"Nüsse",fodmap:"yellow",magen:"yellow",triggers:["fodmap","fett"],fodmaps:["Sorbit"],note:"Kleine Menge.",magenNote:"Fettreich – kleine Menge.",portion:"2 EL",score:3.7},
-{name:"Kürbiskerne (geröstet)",cat:"Nüsse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Gut verträglich.",portion:"2 EL",score:10.0},
-{name:"Flohsamenschalen",cat:"Nüsse",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Schleimbildend – sehr gut für Darm. Viel Wasser trinken.",portion:"1 TL",score:10.0},
-{name:"Walnussöl",cat:"Nüsse",fodmap:"green",magen:"red",triggers:["fett"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Sehr fettreich – nur Tropfen.",portion:"1 TL",score:3.5},
-{name:"Tahini (Sesampaste)",cat:"Nüsse",fodmap:"green",magen:"red",triggers:["fett"],fodmaps:[],note:"Gut verträglich.",magenNote:"Sehr fettreich – max. 1 TL.",portion:"1 TL",score:3.5},
-// GETRÄNKE NEU
-{name:"Kokoswasser (pur)",cat:"Getränke",fodmap:"yellow",magen:"green",triggers:["fodmap"],fodmaps:["Sorbit"],note:"Max. 250ml.",magenNote:"Isotonisch + mild – gut bei Durchfall.",portion:"250ml",score:6.5},
-{name:"Rooibostee",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Säurefrei, antioxidativ – sehr gut.",portion:"unbegrenzt",score:10.0},
-{name:"Hagebuttentee",cat:"Getränke",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Leicht säurehaltig.",portion:"1 Tasse",score:6.5},
-{name:"Lavendeltee",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Entspannend + entkrampfend.",portion:"1 Tasse",score:10.0},
-{name:"Melissentee",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Beruhigt Magen + Nerven.",portion:"1 Tasse",score:10.0},
-{name:"Zitronenbalmtee",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Krampflösend, mild.",portion:"1 Tasse",score:10.0},
-{name:"Leitungswasser",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Immer verträglich.",magenNote:"Ideal.",portion:"unbegrenzt",score:10.0},
-{name:"Trinkschokolade (laktosefrei)",cat:"Getränke",fodmap:"yellow",magen:"red",triggers:["fodmap","saeure","histamin"],fodmaps:["Laktose"],note:"Kleine Menge.",magenNote:"Schokolade entspannt Magenventil – meiden.",portion:"–",score:1.5},
-{name:"Energy Drink",cat:"Getränke",fodmap:"yellow",magen:"red",triggers:["fodmap","saeure","schaerfe"],fodmaps:["Fruktose"],note:"Hoher Zuckergehalt.",magenNote:"Koffein + Kohlensäure + Säure – meiden.",portion:"–",score:1.0},
-{name:"Limo / Softdrinks",cat:"Getränke",fodmap:"red",magen:"red",triggers:["fodmap","saeure","blaehend"],fodmaps:["Fruktose","Sorbit"],note:"Sehr hoher FODMAP-Gehalt.",magenNote:"Zucker + Kohlensäure + Säure – meiden.",portion:"–",score:1.0},
-{name:"Tomatensaft",cat:"Getränke",fodmap:"green",magen:"red",triggers:["saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Sehr säurereich.",portion:"–",score:3.5},
-{name:"Gurken-Wasser",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Basisch + kühlend.",portion:"unbegrenzt",score:10.0},
-{name:"Mineralwasser (Still, basisch)",cat:"Getränke",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Basisches Wasser kann Säure puffern.",portion:"unbegrenzt",score:10.0},
-// GEWÜRZE & SAUCEN NEU
-{name:"Kurkuma-Paste (Golden Milk)",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Entzündungshemmend – sehr zu empfehlen.",portion:"1 TL",score:10.0},
-{name:"Oregano (getrocknet)",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Antientzündlich.",portion:"1 TL",score:10.0},
-{name:"Thymian",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Verdauungsfördernd.",portion:"1 TL",score:10.0},
-{name:"Rosmarin",cat:"Gewürze",fodmap:"green",magen:"yellow",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Stark würzig – kleine Menge.",portion:"1 Zweig",score:7.0},
-{name:"Lorbeer",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Verdauungsfördernd.",portion:"1 Blatt",score:10.0},
-{name:"Kardamom",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Fördert Magenentleerung.",portion:"1 Msp.",score:10.0},
-{name:"Anis",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Blähungslindernd.",portion:"1 TL",score:10.0},
-{name:"Fenchelsamen",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Entkrampfend – nach dem Essen kauen.",portion:"1 TL",score:10.0},
-{name:"Harissa",cat:"Gewürze",fodmap:"red",magen:"red",triggers:["fodmap","schaerfe"],fodmaps:["Fruktane"],note:"Enthält Knoblauch + Chili.",magenNote:"Sehr scharf – meiden.",portion:"–",score:1.0},
-{name:"Currymischung (mild)",cat:"Gewürze",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Auf Zwiebelpulver achten.",magenNote:"Mildes Curry gut verträglich.",portion:"1 TL",score:9.0},
-{name:"Srirachasauce",cat:"Gewürze",fodmap:"yellow",magen:"red",triggers:["fodmap","schaerfe","saeure"],fodmaps:["Fruktane"],note:"Enthält Knoblauch.",magenNote:"Sehr scharf + sauer – meiden.",portion:"–",score:1.0},
-{name:"Fischsauce",cat:"Gewürze",fodmap:"green",magen:"red",triggers:["histamin","saeure"],fodmaps:[],note:"FODMAP-frei.",magenNote:"Extrem histaminreich.",portion:"–",score:2.0},
-{name:"Austernsaðce",cat:"Gewürze",fodmap:"yellow",magen:"red",triggers:["fodmap","histamin","saeure"],fodmaps:["Fruktane"],note:"Enthält Austern.",magenNote:"Histaminreich – meiden.",portion:"–",score:1.0},
-{name:"Worcestershire-Sauce",cat:"Gewürze",fodmap:"red",magen:"red",triggers:["fodmap","histamin","saeure","schaerfe"],fodmaps:["Fruktane","GOS"],note:"Sehr hoher FODMAP-Gehalt.",magenNote:"Viele Trigger – meiden.",portion:"–",score:1.0},
-{name:"BBQ-Sauce",cat:"Gewürze",fodmap:"red",magen:"red",triggers:["fodmap","saeure","schaerfe"],fodmaps:["Fruktose","Fruktane"],note:"Fruktose + Zwiebeln.",magenNote:"Säure + Schärfe + FODMAP-reich.",portion:"–",score:1.0},
-// SNACKS NEU
-{name:"Reiswaffeln mit Schokolade",cat:"Snacks",fodmap:"yellow",magen:"yellow",triggers:["fodmap","saeure"],fodmaps:["Laktose"],note:"Schokobeschichtung enthält Laktose.",magenNote:"Schokolade kann Sodbrennen fördern.",portion:"1–2 Stück",score:5.2},
-{name:"Haferriegel (glutenfrei, ohne Honig)",cat:"Snacks",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Auf Zutaten achten.",magenNote:"Stärkereich.",portion:"1 Stück",score:6.7},
-{name:"Reiscrispies (glutenfrei)",cat:"Snacks",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Gut verträglich.",magenNote:"Stärkereich.",portion:"30g",score:6.7},
-{name:"Fruchtleder (ohne Zuckerzusatz)",cat:"Snacks",fodmap:"yellow",magen:"yellow",triggers:["fodmap","saeure"],fodmaps:["Fruktose"],note:"Hoher Fruktosegehalt.",magenNote:"Säure je nach Frucht.",portion:"15g",score:4.0},
-{name:"Trockenfrüchte (Cranberry)",cat:"Snacks",fodmap:"red",magen:"red",triggers:["fodmap","saeure"],fodmaps:["Sorbit","Fruktose"],note:"Hoher FODMAP-Gehalt.",magenNote:"Säure + FODMAP-reich.",portion:"–",score:1.0},
-{name:"Trockenfrüchte (Mango)",cat:"Snacks",fodmap:"yellow",magen:"yellow",triggers:["fodmap","saeure"],fodmaps:["Fruktose"],note:"Max. 20g.",magenNote:"Süß + säurehaltig.",portion:"20g",score:4.0},
-{name:"Trockenfrüchte (Ananas)",cat:"Snacks",fodmap:"green",magen:"yellow",triggers:["saeure"],fodmaps:[],note:"Gut verträglich.",magenNote:"Leicht säurehaltig.",portion:"20g",score:6.5},
-{name:"Salzgebäck (glutenfrei)",cat:"Snacks",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Auf Zutaten achten.",magenNote:"Stärkereich.",portion:"30g",score:6.7},
-{name:"Maisflips (ungewürzt)",cat:"Snacks",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Gut verträglich.",magenNote:"Stärkereich.",portion:"30g",score:6.7},
-{name:"Reispäckchen (gedämpft)",cat:"Snacks",fodmap:"green",magen:"yellow",triggers:["staerke"],fodmaps:[],note:"Gut verträglich.",magenNote:"Leicht + stärkereich.",portion:"2 Stück",score:6.7},
-{name:"Nürnberger Lebkuchen (glutenfrei)",cat:"Snacks",fodmap:"yellow",magen:"yellow",triggers:["fodmap","schaerfe"],fodmaps:["GOS"],note:"Auf Zutaten achten.",magenNote:"Gewürze können reizen.",portion:"1 Stück",score:3.7},
-{name:"Reislöffelkekse",cat:"Snacks",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Sehr mild.",portion:"5–6 Stück",score:10.0},
-{name:"Babygebäck (Reiswaffel)",cat:"Snacks",fodmap:"green",magen:"green",triggers:[],fodmaps:[],note:"Gut verträglich.",magenNote:"Sehr schonend.",portion:"4–5 Stück",score:10.0},
-{name:"Kokos-Reiswaffeln",cat:"Snacks",fodmap:"yellow",magen:"yellow",triggers:["fodmap","fett"],fodmaps:["Sorbit"],note:"Kleine Menge.",magenNote:"Kokosfett + Sorbit.",portion:"1–2 Stück",score:3.7}
-];
+  const f=db[i];
   const alts=findAlts(f);
   const altHtml=alts.length
-    ?'<div class="mdiv"></div><div class="ml">Alternativen</div>'
-      +'<div class="alts">'
-      +alts.map((a,ai)=>
+    ?'<div class="mdiv"></div><div class="ml">Alternativen</div><div class="alts">'
+      +alts.map(a=>
         '<div class="alt-card" onclick="oM('+db.indexOf(a)+')">'
           +'<div class="alt-top">'
             +'<span class="alt-name">'+a.name+'</span>'
@@ -598,26 +466,41 @@ function oM(i){
           +'</div>'
           +(a.triggers.length?'<div class="chips" style="margin-top:.25rem">'+a.triggers.map(chip).join("")+'</div>':"")
         +'</div>'
-      ).join("")
-      +'</div>'
+      ).join("")+'</div>'
     :"";
+
+  // Score bar
+  const sBar='<div class="m-score"><div class="m-score-bar-wrap"><div class="m-score-bar '+scCls(f.score)+'" style="width:'+(f.score*10)+'%"></div></div><span class="m-score-num '+scCls(f.score)+'">'+f.score+'<span style="font-size:.6rem;color:var(--m);font-weight:400">/10</span></span></div>';
+
+  // FODMAP detail section
+  const fodmapDetail=f.fodmaps.length
+    ?'<div class="mdiv"></div>'
+     +'<div class="ml">Enthaltene FODMAPs</div>'
+     +'<div class="chips" style="margin-top:.3rem">'+f.fodmaps.map(x=>'<span class="chip cF">'+x+'</span>').join("")+'</div>'
+    :'<div class="mdiv"></div><div class="ml">FODMAPs</div><div class="mt" style="color:var(--g);font-size:.75rem">\u2713 Keine FODMAP-Ausl\u00f6ser nachgewiesen</div>';
+
+  // Trigger section
+  const trigDetail=f.triggers.length
+    ?'<div class="mdiv"></div><div class="ml">Reizmagen-Trigger</div><div class="chips" style="margin-top:.3rem">'+f.triggers.map(chip).join("")+'</div>'
+    :'<div class="mdiv"></div><div class="ml">Trigger</div><div class="mt" style="color:var(--g);font-size:.75rem">\u2713 Keine bekannten Reizmagen-Trigger</div>';
 
   document.getElementById("mcon").innerHTML=
     '<div class="mn">'+f.name+'</div>'
-    +'<div class="mcat">'+f.cat+'</div>'
-    +'<div class="ml">Gesamtbewertung</div>'
-    +'<div class="m-score"><div class="m-score-bar-wrap"><div class="m-score-bar '+scCls(f.score)+'" style="width:'+(f.score*10)+'%"></div></div><span class="m-score-num '+scCls(f.score)+'">'+f.score+'<span style="font-size:.6rem;color:var(--m);font-weight:400">/10</span></span></div>'
+    +'<div class="mcat">'+f.cat+' · Portion: '+f.portion+'</div>'
+    +'<div class="ml" style="margin-top:.75rem">Gesamtbewertung</div>'
+    +sBar
     +'<div class="mdiv"></div>'
     +'<div class="ml">Einzelbewertung</div>'
     +'<div class="rtg">'
     +'<div class="rb '+f.fodmap+'"><div class="rbl">FODMAP</div><div class="rbv">'+SI[f.fodmap]+' '+SL[f.fodmap]+'</div></div>'
     +'<div class="rb '+f.magen+'"><div class="rbl">Reizmagen</div><div class="rbv">'+SI[f.magen]+' '+SL[f.magen]+'</div></div>'
     +'</div>'
-    +(f.fodmaps.length?'<div class="mdiv"></div><div class="ml">FODMAPs</div><div class="chips">'+f.fodmaps.map(x=>'<span class="chip cF">'+x+'</span>').join("")+'</div>':"")
-    +(f.triggers.length?'<div class="mdiv"></div><div class="ml">Trigger</div><div class="chips">'+f.triggers.map(chip).join("")+'</div>':"")
-    +'<div class="mdiv"></div><div class="ml">Portion</div><div class="mt">'+f.portion+'</div>'
-    +'<div class="mdiv"></div><div class="ml">FODMAP-Hinweis</div><div class="mt">'+f.note+'</div>'
-    +'<div class="tip">'+f.magenNote+'</div>'
+    +fodmapDetail
+    +trigDetail
+    +'<div class="mdiv"></div>'
+    +'<div class="ml">FODMAP-Hinweis</div>'
+    +'<div class="mt" style="margin-top:.3rem">'+f.note+'</div>'
+    +'<div class="tip" style="margin-top:.65rem">'+f.magenNote+'</div>'
     +altHtml
     +'<div class="disc">Monash University + allgemeine Reizmagen-Empfehlungen. Kein Ersatz f\u00fcr \u00e4rztliche Beratung.</div>';
   document.getElementById("ov").classList.add("open");
